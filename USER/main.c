@@ -42,7 +42,7 @@
 //任务优先级
 #define START_TASK_PRIO				3
 //任务堆栈大小	
-#define START_STK_SIZE 				1024
+#define START_STK_SIZE 				512
 //任务控制块
 OS_TCB StartTaskTCB;
 //任务堆栈	
@@ -70,7 +70,7 @@ void touch_task(void *p_arg);
 //设置任务优先级
 #define MSGMANAGE_TASK_PRIO			5
 //任务堆栈大小
-#define MSGMANAGE_STK_SIZE			1024
+#define MSGMANAGE_STK_SIZE			256
 //任务控制块
 OS_TCB MsgManageTaskTCB;
 //任务堆栈
@@ -137,9 +137,9 @@ void usart_task(void *p_arg);
 
 //捕获音任务
 //设置任务优先级
-#define ECHO_TASK_PRIO 				8
+#define ECHO_TASK_PRIO 				10
 //任务堆栈大小
-#define ECHO_STK_SIZE				128
+#define ECHO_STK_SIZE				1024
 //任务控制块
 OS_TCB EchoTaskTCB;
 //任务堆栈
@@ -424,7 +424,7 @@ void emwin_task(void *p_arg)
 			 WM_SendMessage(WM_GetClientWindow(hWinDialog),&message);
 			
 		}	
-		GUI_Delay(1);
+		GUI_Delay(10);
 	}
 }
 
@@ -465,7 +465,8 @@ void msgManage_task(void *p_arg)
 		
 		hItem = WM_GetDialogItem(hWinDialog,ID_LISTVIEW_0);
 		row=msg->what.food;
-		
+	////////////////////////////////////////////////////////////////////////////////////////////////
+		//处理状态信息
 	  if(msg->what.action == lastAct && msg->what.food == FOOD_NONE){
 			sprintf(msg->what.info,"已经停止投递 %s,无需重复动作",food[row]);
 			
@@ -486,7 +487,7 @@ void msgManage_task(void *p_arg)
                     (OS_OPT		)OS_OPT_POST_FIFO,
 										(OS_ERR*	)&err);			
 			continue;
-		}else	if(msg->srcID != TASK_USART){//串口来源的不去更新动作，因为串口消息若去执行会通知button，button执行进来再做动作更新,不然button进来就显示动作已经做过了
+		}else	if((msg->srcID != TASK_USART)&&(msg->srcID != TASK_AUDIO)){//串口来源的不去更新动作，因为串口消息若去执行会通知button，button执行进来再做动作更新,不然button进来就显示动作已经做过了
 			
 			
  
@@ -503,6 +504,9 @@ void msgManage_task(void *p_arg)
 //										(OS_OPT		)OS_OPT_POST_FIFO,
 //										(OS_ERR*	)&err);			
 		}			
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+		
+		//正式处理信号
 		if(msg->srcID == TASK_EMWIN){
 			
 			OSTaskQPost((OS_TCB*	)&LedTaskTCB,	//向任务Led发送消息
@@ -516,14 +520,22 @@ void msgManage_task(void *p_arg)
                     (OS_OPT		)OS_OPT_POST_FIFO,
 										(OS_ERR*	)&err);							
 			
-		}else if(msg->srcID == TASK_USART || msg->srcID == TASK_AUDIO){		
-				OSTaskQPost((OS_TCB*	)&EmwinTaskTCB,	//向任务Led发送消息
+		}else if((msg->srcID == TASK_USART)||(msg->srcID == TASK_AUDIO)){		
+				OSTaskQPost((OS_TCB*	)&EmwinTaskTCB,	//向任务EWIN发送消息
                     (void*		)msg,
                     (OS_MSG_SIZE)(sizeof(msg_T)),
                     (OS_OPT		)OS_OPT_POST_FIFO,
-										(OS_ERR*	)&err);
-
+										(OS_ERR*	)&err);										
 		}
+//		else if(motor_flag && (msg->srcID == TASK_AUDIO)){	
+//				motor_flag = 0;
+//				OSTaskQPost((OS_TCB*	)&EmwinTaskTCB,	//向任务Led发送消息
+//                    (void*		)msg,
+//                    (OS_MSG_SIZE)(sizeof(msg_T)),
+//                    (OS_OPT		)OS_OPT_POST_FIFO,
+//										(OS_ERR*	)&err);
+
+//		}
 		//OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_PERIODIC,&err); //延时1s
 	}
 	
@@ -578,7 +590,7 @@ void led_task(void *p_arg)
 					OSTimeDlyHMSM(0,0,0,250,OS_OPT_TIME_PERIODIC,&err);//延时500ms
 				}
 		}
-		
+//		motor_flag = 1;
 	}
 }
 
@@ -592,7 +604,7 @@ void motor_task(void *p_arg)
 	OS_MSG_SIZE size;
 	OS_ERR err; 
 	int i;	
-	 TIM_SetCompare1(TIM14,19000);	//关闭
+	 TIM_SetCompare1(TIM14,18000);	//关闭
 	
 		//TIM14_PWM_Init(20000-1,84-1);//50hz
 	 while(1) //实现比较值从0-300递增，到300后从300-0递减，循环
@@ -604,11 +616,14 @@ void motor_task(void *p_arg)
 										(OS_ERR*      )&err );
 		if(msg->what.action == ACT_OK && msg->what.food != FOOD_NONE)
 			//TIM_SetCompare1(TIM14,18000);	//修改比较值，修改占空比
-		 TIM_SetCompare1(TIM14,18000);	//修改比较值，修改占空比
+		 {
+			 TIM_SetCompare1(TIM14,19000);	//修改比较值，修改占空比
+			 printf("motor on\r\n");}
 	  else if(msg->what.action == ACT_CANCEL && msg->what.food == FOOD_NONE)
 		 // TIM_SetCompare1(TIM14,19999);	//修改比较值，修改占空比
-			
-		 TIM_SetCompare1(TIM14,19000);	//修改比较值，修改占空比
+			{
+				TIM_SetCompare1(TIM14,18000);
+				printf("motor off\r\n");}	//修改比较值，修改占空比
 	}
 }
 
@@ -668,7 +683,7 @@ void usart_task(void *p_arg)
 			{
 				rec_buf[i]=USART_RX_BUF[i];
 			}
-			strncpy(rec_buf,(char *)USART_RX_BUF,len);
+//			strncpy(rec_buf,(char *)USART_RX_BUF,len);
 			rec_buf[len]='\0';
 			
 			
@@ -717,16 +732,34 @@ void usart_task(void *p_arg)
 		
 	}
 }
-
+u8 *i2srecbuf1;
+u8 *i2srecbuf2; 
+u8 rec_sta=0;		//录音状态
 //ECHO任务
 void echo_task(void *p_arg)
 {
 //	OS_ERR err;
-	while(1)
+//	while(1)
+//	{
+//		wav_recorder();
+////		OSTimeDlyHMSM(0,0,0,10,OS_OPT_TIME_PERIODIC,&err);//延时500ms
+//		
+//	}
+	u8 rval=0; 
+	OS_ERR err;
+	i2srecbuf1=mymalloc(SRAMIN,I2S_RX_DMA_BUF_SIZE);//I2S录音内存1申请
+	i2srecbuf2=mymalloc(SRAMIN,I2S_RX_DMA_BUF_SIZE);//I2S录音内存2申请  
+	if(!i2srecbuf1||!i2srecbuf2)rval=1; 	if(rval==0)		
 	{
-		wav_recorder();
-//		OSTimeDlyHMSM(0,0,0,10,OS_OPT_TIME_PERIODIC,&err);//延时500ms
-		
-	}
+		recoder_enter_rec_mode();	//进入录音模式,此时耳机可以听到咪头采集到的音频   
+		rec_sta|=0X80;	//开始录音	
+ 	  while(rval==0)
+		{	
+				OSTimeDlyHMSM(0,0,0,10,OS_OPT_TIME_PERIODIC,&err);//延时500ms
+		}			 
+	} 
+	myfree(SRAMIN,i2srecbuf1);	//释放内存
+	myfree(SRAMIN,i2srecbuf2);	//释放内存 	
+	
 	
 }

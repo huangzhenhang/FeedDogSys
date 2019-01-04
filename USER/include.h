@@ -5,6 +5,7 @@
 
 
 
+
 //MsgManage任务
 //任务控制块
 extern OS_TCB MsgManageTaskTCB;
@@ -63,8 +64,9 @@ typedef struct msg_t{
 }msg_T;
 
 extern msg_T msgGloba;
-
-
+extern u8 *i2srecbuf1;
+extern u8 *i2srecbuf2; 
+extern u8 rec_sta;		//录音状态
 
 #endif
 

@@ -25,13 +25,13 @@
 //All rights reserved									  
 ////////////////////////////////////////////////////////////////////////////////// 	
   
-u8 *i2srecbuf1;
-u8 *i2srecbuf2; 
+//u8 *i2srecbuf1;
+//u8 *i2srecbuf2; 
 u32 cont;
 
 FIL* f_rec=0;		//录音文件	
 u32 wavsize;		//wav数据大小(字节数,不包括文件头!!)
-u8 rec_sta=0;		//录音状态
+//u8 rec_sta=0;		//录音状态
 					//[7]:0,没有开启录音;1,已经开启录音;
 					//[6:1]:保留
 					//[0]:0,正在录音;1,暂停录音;
@@ -52,18 +52,18 @@ int rec_sum(u8* path)
 		  element++;
 //		  if(sum>=4000000000)return 1;
 	}
-	if(sum>=6100.54)
+	if(sum>=7100.54)
 	{
 		
 		_msg->srcID = TASK_AUDIO;
-		_msg->what.action = ACT_OK;
 		_msg->what.food = FOOD_EGG;
+		_msg->what.action = ACT_OK;
 		OSTaskQPost((OS_TCB*	)&MsgManageTaskTCB,	//向任务Msgdis发送消息
 								(void*		)_msg,
 								(OS_MSG_SIZE)(sizeof(msg_T)),
 								(OS_OPT		)OS_OPT_POST_FIFO,
 								(OS_ERR*	)&err);	
-	printf("THE DOG NEED FOOD %d\r\n",cont++);
+		printf("THE DOG NEED FOOD %d\r\n",cont++);
 	
 	}
 	if(cont>600)cont=0;
@@ -109,7 +109,7 @@ void recoder_enter_rec_mode(void)
 	WM8978_ADDA_Cfg(0,1);		//开启ADC
 	WM8978_Input_Cfg(1,1,0);	//开启输入通道(MIC&LINE IN)
 	WM8978_Output_Cfg(0,1);		//开启BYPASS输出 
-	WM8978_MIC_Gain(46);		//MIC增益设置 
+	WM8978_MIC_Gain(10);		//MIC增益设置 
 	
 	WM8978_I2S_Cfg(2,0);		//飞利浦标准,16位数据长度
 	I2S2_Init(I2S_Standard_Phillips,I2S_Mode_MasterTx,I2S_CPOL_Low,I2S_DataFormat_16b);			//飞利浦标准,主机发送,时钟低电平有效,16位帧长度 
