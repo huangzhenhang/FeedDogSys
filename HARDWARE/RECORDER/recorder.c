@@ -56,6 +56,7 @@ int rec_sum(u8* path)
 	{
 		
 		_msg->srcID = TASK_AUDIO;
+		_msg->what.action = ACT_OK;
 		_msg->what.food = FOOD_EGG;
 		OSTaskQPost((OS_TCB*	)&MsgManageTaskTCB,	//向任务Msgdis发送消息
 								(void*		)_msg,

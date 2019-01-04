@@ -1,3 +1,4 @@
+#include <string.h>
 #include "sys.h"
 #include "delay.h"
 #include "usart.h"
@@ -16,9 +17,7 @@
 #include "FramewinDLG.h"
 #include "WM.h"
 #include "DIALOG.h"
-
 #include "pwm.h"
-#include <string.h>
 #include "include.h"
 #include "wm8978.h"	 
 #include "recorder.h"
@@ -171,6 +170,7 @@ int main(void)
 	mem_init(SRAMIN); 		//内部RAM初始化
 	mem_init(SRAMEX); 		//外部RAM初始化
 	mem_init(SRAMCCM);		//CCM初始化
+	TIM14_PWM_Init(20000-1,84-1);//50hz 为了控制舵机
 	
 	exfuns_init();			//为fatfs文件系统分配内存
 	f_mount(fs[0],"0:",1);	//挂载SD卡
@@ -180,7 +180,7 @@ int main(void)
 	
 	
 
-	TIM14_PWM_Init(20000-1,84-1);//50hz 为了控制舵机
+	
 	
 	OSInit(&err);			//初始化UCOSIII
 	OS_CRITICAL_ENTER();	//进入临界区
@@ -325,19 +325,19 @@ void start_task(void *p_arg)
                  (OS_ERR*     )&err);				 							 							 		
 	
 		//ECHO任务
-//	OSTaskCreate(  (OS_TCB*     )&EchoTaskTCB,		
-//				         (CPU_CHAR*   )"Echo task", 		
-//                 (OS_TASK_PTR )echo_task, 			
-//                 (void*       )0,					
-//                 (OS_PRIO	  )ECHO_TASK_PRIO,     
-//                 (CPU_STK*    )&ECHO_TASK_STK[0],	
-//                 (CPU_STK_SIZE)ECHO_STK_SIZE/10,	
-//                 (CPU_STK_SIZE)ECHO_STK_SIZE,		
-//                 (OS_MSG_QTY  )TASK_Q_NUM/2,					
-//                 (OS_TICK	  )0,  					
-//                 (void*       )0,					
-//                 (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR,
-//                 (OS_ERR*     )&err);				 							 								
+	OSTaskCreate(  (OS_TCB*     )&EchoTaskTCB,		
+				         (CPU_CHAR*   )"Echo task", 		
+                 (OS_TASK_PTR )echo_task, 			
+                 (void*       )0,					
+                 (OS_PRIO	  )ECHO_TASK_PRIO,     
+                 (CPU_STK*    )&ECHO_TASK_STK[0],	
+                 (CPU_STK_SIZE)ECHO_STK_SIZE/10,	
+                 (CPU_STK_SIZE)ECHO_STK_SIZE,		
+                 (OS_MSG_QTY  )TASK_Q_NUM/2,					
+                 (OS_TICK	  )0,  					
+                 (void*       )0,					
+                 (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR,
+                 (OS_ERR*     )&err);				 							 								
 								 
 	OS_TaskSuspend((OS_TCB*)&StartTaskTCB,&err);		//挂起开始任务			 
 	OS_CRITICAL_EXIT();	//退出临界区
@@ -424,7 +424,7 @@ void emwin_task(void *p_arg)
 			 WM_SendMessage(WM_GetClientWindow(hWinDialog),&message);
 			
 		}	
-		GUI_Delay(10);
+		GUI_Delay(1);
 	}
 }
 
