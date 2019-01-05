@@ -137,7 +137,7 @@ static void _cbDialog(WM_MESSAGE * pMsg) {
 	msg_T* msg;
 //	OS_MSG_SIZE size;
 	OS_ERR err; 
-	
+	OSMutexPend (&TEST_MUTEX,0,OS_OPT_PEND_BLOCKING,0,&err);	//请求互斥信号量
 	//_msg =(msg_T *)mymalloc(SRAMIN,sizeof(msg_T));	//消息不能是局部的！
    
 	msg=&msgGloba;
@@ -379,6 +379,7 @@ static void _cbDialog(WM_MESSAGE * pMsg) {
 		default:
 			break;
   }
+	OSMutexPost(&TEST_MUTEX,OS_OPT_POST_NONE,&err);				//释放互斥信号量	
 }
 
 /*********************************************************************

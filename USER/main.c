@@ -40,7 +40,7 @@
 ************************************************/
 
 //任务优先级
-#define START_TASK_PRIO				3
+#define START_TASK_PRIO				2
 //任务堆栈大小	
 #define START_STK_SIZE 				512
 //任务控制块
@@ -54,7 +54,7 @@ void start_task(void *p_arg);
 
 //TOUCH任务
 //设置任务优先级
-#define TOUCH_TASK_PRIO				4
+#define TOUCH_TASK_PRIO				3
 //任务堆栈大小
 #define TOUCH_STK_SIZE				128
 //任务控制块
@@ -68,7 +68,7 @@ void touch_task(void *p_arg);
 
 //MsgManage任务
 //设置任务优先级
-#define MSGMANAGE_TASK_PRIO			5
+#define MSGMANAGE_TASK_PRIO			4
 //任务堆栈大小
 #define MSGMANAGE_STK_SIZE			256
 //任务控制块
@@ -83,7 +83,7 @@ void msgManage_task(void *p_arg);
 
 //EMWIN任务
 //设置任务优先级
-#define EMWIN_TASK_PRIO			6
+#define EMWIN_TASK_PRIO			5
 //任务堆栈大小
 #define EMWIN_STK_SIZE			2048
 //任务控制块
@@ -97,7 +97,7 @@ void emwin_task(void *p_arg);
 
 //LED任务
 //设置任务优先级
-#define LED_TASK_PRIO 				7
+#define LED_TASK_PRIO 				8
 //任务堆栈大小
 #define LED_STK_SIZE				128
 //任务控制块
@@ -110,7 +110,7 @@ void led_task(void *p_arg);
 
 //motor任务
 //设置任务优先级
-#define MOTOR_TASK_PRIO 				8
+#define MOTOR_TASK_PRIO 				9
 //任务堆栈大小
 #define MOTOR_STK_SIZE				128
 //任务控制块
@@ -124,7 +124,7 @@ void motor_task(void *p_arg);
 
 //串口任务
 //设置任务优先级
-#define USART_TASK_PRIO 				9
+#define USART_TASK_PRIO 				6
 //任务堆栈大小
 #define USART_STK_SIZE				512
 //任务控制块
@@ -137,7 +137,7 @@ void usart_task(void *p_arg);
 
 //捕获音任务
 //设置任务优先级
-#define ECHO_TASK_PRIO 				10
+#define ECHO_TASK_PRIO 				7
 //任务堆栈大小
 #define ECHO_STK_SIZE				1024
 //任务控制块
@@ -387,7 +387,6 @@ void emwin_task(void *p_arg)
 							(OS_MSG_SIZE*	)&size,
 							(CPU_TS*		)0,
 							(OS_ERR*      )&err );
-		OSMutexPend (&TEST_MUTEX,0,OS_OPT_PEND_BLOCKING,0,&err);	//请求互斥信号量
 		if(msg != NULL ){
 			
 		  if(msg->what.action == ACT_CANCEL){
@@ -430,7 +429,7 @@ void emwin_task(void *p_arg)
 			 WM_SendMessage(WM_GetClientWindow(hWinDialog),&message);
 			
 		}
-		OSMutexPost(&TEST_MUTEX,OS_OPT_POST_NONE,&err);				//释放互斥信号量	
+		
 		GUI_Delay(10);
 	}
 }
