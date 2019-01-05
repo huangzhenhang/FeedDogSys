@@ -67,6 +67,6 @@ extern msg_T msgGloba;
 extern u8 *i2srecbuf1;
 extern u8 *i2srecbuf2; 
 extern u8 rec_sta;		//录音状态
-
+extern OS_MUTEX	TEST_MUTEX;		//定义一个互斥信号量
 #endif
 

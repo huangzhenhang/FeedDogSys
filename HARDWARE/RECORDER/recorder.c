@@ -67,6 +67,7 @@ int rec_sum(u8* path)
 	}
 	if(sum>=7100.54)
 	{
+		OSMutexPend (&TEST_MUTEX,0,OS_OPT_PEND_BLOCKING,0,&err);	//请求互斥信号量
 		_msg = &msgGloba;	//消息不能是局部的！
 		_msg->srcID = TASK_AUDIO;
 		_msg->what.food = row;
@@ -77,7 +78,7 @@ int rec_sum(u8* path)
 								(OS_OPT		)OS_OPT_POST_FIFO,
 								(OS_ERR*	)&err);	
 		printf("THE DOG NEED FOOD %d\r\n",cont++);
-	
+		OSMutexPost(&TEST_MUTEX,OS_OPT_POST_NONE,&err);				//释放互斥信号量	
 	}
 	if(cont>600)cont=0;
 	}

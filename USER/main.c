@@ -678,12 +678,10 @@ void usart_task(void *p_arg)
 							(OS_MSG_SIZE*	)&size,
 							(CPU_TS*		)0,
 							(OS_ERR*      )&err );
-		 OSMutexPend (&TEST_MUTEX,0,OS_OPT_PEND_BLOCKING,0,&err);	//请求互斥信号量
 		 if(msg != NULL){
 			 printf("%s",msg->what.info);
 			 printf("\r\n\r\n");//插入换行	
 		 } 
-			OSMutexPost(&TEST_MUTEX,OS_OPT_POST_NONE,&err);				//释放互斥信号量		
 			if(USART_RX_STA&0x8000)//串口收到消息
 		 {					   
 			len=USART_RX_STA&0x3fff;//得到此次接收到的数据长度
