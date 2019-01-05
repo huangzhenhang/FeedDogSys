@@ -12,6 +12,11 @@
 #include "text.h"
 #include "string.h"  
 #include "include.h"
+#include "GUI.h"
+#include "includes.h"
+#include "FramewinDLG.h"
+#include "WM.h"
+#include "DIALOG.h"
 //////////////////////////////////////////////////////////////////////////////////	 
 //本程序只供学习使用，未经作者许可，不得用于其它任何用途
 //ALIENTEK STM32F407开发板
@@ -44,8 +49,16 @@ int rec_sum(u8* path)
 	OS_ERR err;
 	double sum;
 	u16 t;
+	unsigned row;
+	WM_HWIN hItem;
 	sum = 0;
-	_msg = &msgGloba;	//消息不能是局部的！
+	
+	
+	
+	hItem = WM_GetDialogItem(hWinDialog,ID_LISTVIEW_0); 
+	row = LISTVIEW_GetSel(hItem);
+	if(row >= FOOD_NONE)return 0;
+	else{
 	for(t=0; t<=4000; t++)
 	{
 			sum+= ((*element)/100.0);
@@ -54,9 +67,9 @@ int rec_sum(u8* path)
 	}
 	if(sum>=7100.54)
 	{
-		
+		_msg = &msgGloba;	//消息不能是局部的！
 		_msg->srcID = TASK_AUDIO;
-		_msg->what.food = FOOD_EGG;
+		_msg->what.food = row;
 		_msg->what.action = ACT_OK;
 		OSTaskQPost((OS_TCB*	)&MsgManageTaskTCB,	//向任务Msgdis发送消息
 								(void*		)_msg,
@@ -67,6 +80,7 @@ int rec_sum(u8* path)
 	
 	}
 	if(cont>600)cont=0;
+	}
 	return 0;
 }
 					

@@ -282,12 +282,13 @@ static void _cbDialog(WM_MESSAGE * pMsg) {
 												(OS_MSG_SIZE)(sizeof(msg_T)),
 												(OS_OPT		)OS_OPT_POST_FIFO,
 												(OS_ERR*	)&err);	
-										
+						
 						hItem = WM_GetDialogItem(pMsg->hWin, ID_LISTVIEW_0);
-						row=LISTVIEW_GetSel(hItem);
+						row=LISTVIEW_GetSel(hItem); 
 						LISTVIEW_SetItemBkColor(hItem,0,row,LISTVIEW_CI_SEL,GUI_RED);
 						LISTVIEW_SetItemBkColor(hItem,1,row,LISTVIEW_CI_SEL,GUI_RED);	
-						LISTVIEW_SetItemBkColor(hItem,2,row,LISTVIEW_CI_SEL,GUI_RED);							
+						LISTVIEW_SetItemBkColor(hItem,2,row,LISTVIEW_CI_SEL,GUI_RED);			
+           	WM_SetFocus(WM_GetDialogItem(pMsg->hWin,ID_BUTTON_0));						
 
 					  break;
 				}

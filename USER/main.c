@@ -147,7 +147,7 @@ CPU_STK ECHO_TASK_STK[ECHO_STK_SIZE];
 //echo任务
 void echo_task(void *p_arg);
 
-
+OS_MUTEX	TEST_MUTEX;		//定义一个互斥信号量
 
 msg_T msgGloba;
 static char motor_flag = 1; 
@@ -179,11 +179,15 @@ int main(void)
 	TP_Init();				//初始化触摸屏
 	
 	
-
-	
 	
 	OSInit(&err);			//初始化UCOSIII
 	OS_CRITICAL_ENTER();	//进入临界区
+		//创建一个互斥信号量
+	OSMutexCreate((OS_MUTEX*	)&TEST_MUTEX,
+				  (CPU_CHAR*	)"TEST_MUTEX",
+                  (OS_ERR*		)&err);
+	
+	
 	//创建开始任务
 	OSTaskCreate(  (OS_TCB 	* )&StartTaskTCB,		//任务控制块
 				         (CPU_CHAR	* )"start task", 		//任务名字
@@ -383,6 +387,7 @@ void emwin_task(void *p_arg)
 							(OS_MSG_SIZE*	)&size,
 							(CPU_TS*		)0,
 							(OS_ERR*      )&err );
+		OSMutexPend (&TEST_MUTEX,0,OS_OPT_PEND_BLOCKING,0,&err);	//请求互斥信号量
 		if(msg != NULL ){
 			
 		  if(msg->what.action == ACT_CANCEL){
@@ -407,6 +412,7 @@ void emwin_task(void *p_arg)
 					message.MsgId = WM_MSGUSER;
 					message.Data.v = WM_NOTIFICATION_RELEASED;
 					WM_SendMessage(WM_GetClientWindow(hWinDialog),&message);
+					
 				}else{
 					row=msg->what.food;
 					LISTVIEW_SetSel(hItem,row);//会给listview发change消息
@@ -423,7 +429,8 @@ void emwin_task(void *p_arg)
 			 //必须WM_GetClientWindow 要发送消息到framewin的client(客户窗口区),调该窗口的回调函数才能进去，hWinDialog是framewin的句柄，非client句柄
 			 WM_SendMessage(WM_GetClientWindow(hWinDialog),&message);
 			
-		}	
+		}
+		OSMutexPost(&TEST_MUTEX,OS_OPT_POST_NONE,&err);				//释放互斥信号量	
 		GUI_Delay(10);
 	}
 }
@@ -671,11 +678,12 @@ void usart_task(void *p_arg)
 							(OS_MSG_SIZE*	)&size,
 							(CPU_TS*		)0,
 							(OS_ERR*      )&err );
+		 OSMutexPend (&TEST_MUTEX,0,OS_OPT_PEND_BLOCKING,0,&err);	//请求互斥信号量
 		 if(msg != NULL){
 			 printf("%s",msg->what.info);
 			 printf("\r\n\r\n");//插入换行	
 		 } 
-				
+			OSMutexPost(&TEST_MUTEX,OS_OPT_POST_NONE,&err);				//释放互斥信号量		
 			if(USART_RX_STA&0x8000)//串口收到消息
 		 {					   
 			len=USART_RX_STA&0x3fff;//得到此次接收到的数据长度
@@ -690,8 +698,8 @@ void usart_task(void *p_arg)
 			
 		
 			food_id = cmd_Parse(rec_buf);
+			OSMutexPend (&TEST_MUTEX,0,OS_OPT_PEND_BLOCKING,0,&err);	//请求互斥信号量
 			if(food_id !=FOOD_NONE){
-				
 				//printf("%s 正在投递",food[food_id]);
 				msg=&msgGloba;
 			  msg->srcID = TASK_USART;
@@ -718,6 +726,7 @@ void usart_task(void *p_arg)
 			else{
 				printf("wrong code!!");
 			}
+			OSMutexPost(&TEST_MUTEX,OS_OPT_POST_NONE,&err);				//释放互斥信号量	
 			printf("\r\n\r\n");//插入换行	
 			USART_RX_STA=0;
 		}else{
@@ -726,9 +735,9 @@ void usart_task(void *p_arg)
 			{
 				printf("\r\n短信喂狗系统\r\n");
 			}
-			if(times%200==0)printf("请输入食物,以回车键结束\r\n");  
-      OSTimeDlyHMSM(0,0,0,10,OS_OPT_TIME_PERIODIC,&err);//延时10ms			
+			if(times%200==0)printf("请输入食物,以回车键结束\r\n");      	
 		}
+		OSTimeDlyHMSM(0,0,0,10,OS_OPT_TIME_PERIODIC,&err);//延时10ms		
 		
 	}
 }
