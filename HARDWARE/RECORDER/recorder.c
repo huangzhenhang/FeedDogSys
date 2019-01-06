@@ -53,11 +53,10 @@ int rec_sum(u8* path)
 	WM_HWIN hItem;
 	sum = 0;
 	
-	
-	
 	hItem = WM_GetDialogItem(hWinDialog,ID_LISTVIEW_0); 
 	row = LISTVIEW_GetSel(hItem);
-	if(row >= FOOD_NONE)return 0;
+	_msg = &msgGloba;	//消息不能是局部的！
+	if((row >= FOOD_NONE))return 0;
 	else{
 	for(t=0; t<=4000; t++)
 	{
@@ -65,10 +64,9 @@ int rec_sum(u8* path)
 		  element++;
 //		  if(sum>=4000000000)return 1;
 	}
-	if(sum>=7100.54)
+	if(sum>=7500.54)
 	{
 		OSMutexPend (&TEST_MUTEX,0,OS_OPT_PEND_BLOCKING,0,&err);	//请求互斥信号量
-		_msg = &msgGloba;	//消息不能是局部的！
 		_msg->srcID = TASK_AUDIO;
 		_msg->what.food = row;
 		_msg->what.action = ACT_OK;
@@ -124,7 +122,7 @@ void recoder_enter_rec_mode(void)
 	WM8978_ADDA_Cfg(0,1);		//开启ADC
 	WM8978_Input_Cfg(1,1,0);	//开启输入通道(MIC&LINE IN)
 	WM8978_Output_Cfg(0,1);		//开启BYPASS输出 
-	WM8978_MIC_Gain(10);		//MIC增益设置 
+	WM8978_MIC_Gain(0);		//MIC增益设置 
 	
 	WM8978_I2S_Cfg(2,0);		//飞利浦标准,16位数据长度
 	I2S2_Init(I2S_Standard_Phillips,I2S_Mode_MasterTx,I2S_CPOL_Low,I2S_DataFormat_16b);			//飞利浦标准,主机发送,时钟低电平有效,16位帧长度 

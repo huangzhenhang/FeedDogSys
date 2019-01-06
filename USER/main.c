@@ -388,30 +388,23 @@ void emwin_task(void *p_arg)
 							(CPU_TS*		)0,
 							(OS_ERR*      )&err );
 		if(msg != NULL ){
-			
 		  if(msg->what.action == ACT_CANCEL){
-				
 				//发送消息给按钮
 				hItem = WM_GetDialogItem(hWinDialog,ID_BUTTON_1);
 				message.hWinSrc = hItem;
 				message.hWin = 	hWinDialog;		
 				message.MsgId = WM_MSGUSER;
 				message.Data.v = WM_NOTIFICATION_RELEASED;
-				
 			}else if(msg->what.action == ACT_OK){
 				//设置选中
 				hItem = WM_GetDialogItem(hWinDialog,ID_LISTVIEW_0);
-
 				row = LISTVIEW_GetSel(hItem);
-				
-				
 				if(row == msg->what.food){
 					message.hWinSrc = hItem;//解决bug：viewlist当前已经在这行，是取消的状态，通过串口发送这行选择的状态，因为行不变所以LISTVIEW_SetSel不会触发change事件，要手动触发
 					message.hWin = 	hWinDialog;		
 					message.MsgId = WM_MSGUSER;
 					message.Data.v = WM_NOTIFICATION_RELEASED;
 					WM_SendMessage(WM_GetClientWindow(hWinDialog),&message);
-					
 				}else{
 					row=msg->what.food;
 					LISTVIEW_SetSel(hItem,row);//会给listview发change消息
@@ -422,9 +415,7 @@ void emwin_task(void *p_arg)
 				message.hWin = 	hWinDialog;		
 				message.MsgId = WM_MSGUSER;
 				message.Data.v = WM_NOTIFICATION_RELEASED;
-				
 			}	
-			
 			 //必须WM_GetClientWindow 要发送消息到framewin的client(客户窗口区),调该窗口的回调函数才能进去，hWinDialog是framewin的句柄，非client句柄
 			 WM_SendMessage(WM_GetClientWindow(hWinDialog),&message);
 			
@@ -447,9 +438,6 @@ void touch_task(void *p_arg)
 
 
 const char food[5][FOOD_TOTAL_NUM]= {"汉堡","披萨","橘子","米饭","鸡蛋"};
-
-
-
 
 //msgManage_task任务
 void msgManage_task(void *p_arg)
@@ -495,20 +483,7 @@ void msgManage_task(void *p_arg)
 			continue;
 		}else	if((msg->srcID != TASK_USART)&&(msg->srcID != TASK_AUDIO)){//串口来源的不去更新动作，因为串口消息若去执行会通知button，button执行进来再做动作更新,不然button进来就显示动作已经做过了
 			
-			
- 
 			 lastAct = msg->what.action;//更新动作
-//			  
-//			 if(msg->what.action == ACT_OK){
-//				 sprintf(msg->what.info,"正在投递 %s",food[row]);
-//			 }else if(msg->what.action == ACT_CANCEL){
-//				 sprintf(msg->what.info,"停止投递%s",food[row]);
-//			 }	 
-//			 OSTaskQPost((OS_TCB*	)&UsartTaskTCB,	//向任务串口发送消息
-//										(void*		)msg,
-//										(OS_MSG_SIZE)(sizeof(msg_T)),
-//										(OS_OPT		)OS_OPT_POST_FIFO,
-//										(OS_ERR*	)&err);			
 		}			
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 		
@@ -568,9 +543,6 @@ void led_task(void *p_arg)
                       (OS_MSG_SIZE*	)&size,
                       (CPU_TS*		)0,
                       (OS_ERR*      )&err );
-		
-
-		
 		//0 点亮 左边LED0 右边LED1 
 	  if(msg->what.food == FOOD_NONE){
 			LED0 = 1;LED1 = 1;//00
@@ -690,9 +662,6 @@ void usart_task(void *p_arg)
 			}
 //			strncpy(rec_buf,(char *)USART_RX_BUF,len);
 			rec_buf[len]='\0';
-			
-			
-			
 		
 			food_id = cmd_Parse(rec_buf);
 			OSMutexPend (&TEST_MUTEX,0,OS_OPT_PEND_BLOCKING,0,&err);	//请求互斥信号量
@@ -718,7 +687,6 @@ void usart_task(void *p_arg)
 											(OS_MSG_SIZE)(sizeof(msg_T)),
 											(OS_OPT		)OS_OPT_POST_FIFO,
 											(OS_ERR*	)&err);	
-			
 			}
 			else{
 				printf("wrong code!!");
